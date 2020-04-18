@@ -67,6 +67,6 @@ A preview of the replaced string can be seen when hovering on a match. Useful wh
 
 ## Caveats
 
-When setting an initial value in provided to an `InputBox`, it the whole text gets selected. This is annoying in our case because you want to start typing at the end.
-Currently there's no way to bypass this (see [this](https://github.com/microsoft/vscode/issues/56759)).
+When setting an initial value to an `InputBox` the whole text gets selected. This is annoying in our case because you want to start typing at the very end.
+Currently there's no way to change this behavior (see [this](https://github.com/microsoft/vscode/issues/56759)).
 The hack is to set the value after the input box is shown which can cause some delay.
