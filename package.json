@@ -2,7 +2,7 @@
   "name": "vscode-vim-search-and-replace",
   "displayName": "Vim Search and Replace",
   "publisher": "nlehmann",
-  "description": "Search and replace using using vim's [range]s/search/replace/[flags] syntax with a nice preview of replacements",
+  "description": "Search and replace using vim's [range]s/search/replace/[flags] syntax with a nice preview of replacements",
   "repository": "git:nilehmann/vscode-vim-search-and-replace",
   "version": "0.1.0",
   "engines": {
