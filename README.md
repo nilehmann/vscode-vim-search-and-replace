@@ -1,6 +1,14 @@
 # Vim Search and Replace
 
-Search and replace on the active editor using vim's `[range]s/search/replace/[flags]` syntax.
+Search and replace using vim's `[range]s/search/replace/[flags]` syntax with a nice preview of replacements.
+
+<img src="screenshots/demo.gif">
+
+## Quick Start
+
+- Assign a keyboard shortcut to the command `vim-search-and-replace.start`
+- Execute the command with the assigned keyboard shortcut and type in the input box after the prompt `%s/`
+- You should see matches highlighted in the document. If you type the replacement pattern you should also see a preview of the replacement.
 
 ## Features
 
@@ -28,7 +36,7 @@ The _search_ string can be any valid javascript regular expressions and _replace
 
   `%s/search/replace`
 
-- Search the current selection
+- Search the current selection (take a look at `vim-search-and-replace.exandSelection` below)
 
   `'<,'>s/search/replace`
 
@@ -36,13 +44,13 @@ The _search_ string can be any valid javascript regular expressions and _replace
 
   `8,10s/search/replace`
 
-### Preview changes on hover
+### Preview changes
 
-A preview of the replaced string can be seen when hovering on a match. Useful when you have a complex regular expression with capture groups used in the replacement pattern.
+A preview of the replaced string is shown beside each match. Useful when you have a complex regular expression with capture groups used in the replacement pattern.
 
 ## Commands
 
-- `vim-search-and-replace.start`: Start search and replace. This command accepts an optional string parameter which will be used as the initial search string. This is useful in my neovim configuration because I can start the search with the visual selection.
+- `vim-search-and-replace.start`: Start the search and replace. This command accepts an optional string parameter which will be used as the initial search string. This is useful in my neovim configuration because I can start the search with the visual selection.
 
 - `vim-search-and-replace.expandSelection`: This command does two things. First, it changes the current range to be `'<,'>`. Second, it expands the current selection to contain more lines. It accepts an optional argument specifying how many lines up and down the selection should be expanded.
 

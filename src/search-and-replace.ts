@@ -3,6 +3,9 @@ import { type } from "os";
 
 const matchHighlight = vscode.window.createTextEditorDecorationType({
   backgroundColor: "rgba(255,0,0,.35)",
+  after: {
+    backgroundColor: "rgba(0,255,0,.35)",
+  },
 });
 
 export function searchAndReplace(
@@ -106,7 +109,7 @@ class SearchAndReplace {
 
     this.edits = cmd.findMatches(this.textEditor.document).map((m) => {
       let replacement;
-      if (typeof cmd.replace === "string") {
+      if (typeof cmd.replace === "string" && cmd.search) {
         replacement = m.text.replace(cmd.search, cmd.replace);
       }
       return new Edit(m.text, m.range, replacement);
@@ -185,20 +188,10 @@ class Edit {
   ) {}
 
   getDecoration() {
-    let hoverMessage = new vscode.MarkdownString();
-    const arrow = "&nbsp;&nbsp;&nbsp;⟶&nbsp;&nbsp;&nbsp;";
-    if (this.replacement === undefined) {
-      hoverMessage.appendMarkdown("*no replacement*");
-    } else {
-      hoverMessage.appendMarkdown(backTickSurround(this.text));
-      hoverMessage.appendText(arrow);
-      if (this.replacement === "") {
-        hoverMessage.appendMarkdown("*empty string*");
-      } else {
-        hoverMessage.appendMarkdown(backTickSurround(this.replacement));
-      }
-    }
-    return { range: this.range, hoverMessage };
+    return {
+      range: this.range,
+      renderOptions: { after: { contentText: this.replacement } },
+    };
   }
 }
 
@@ -237,7 +230,7 @@ class SubstCmd {
   );
 
   constructor(
-    public search: RegExp,
+    public search: RegExp | undefined,
     public replace: string | undefined,
     public lineRange: LineRange | undefined
   ) {}
@@ -246,7 +239,10 @@ class SubstCmd {
     try {
       let m = str.match(SubstCmd.regex);
       if (m) {
-        let regex = new RegExp(m[3], m[5]);
+        let regex;
+        if (m[3]) {
+          regex = new RegExp(m[3], m[5]);
+        }
         return new SubstCmd(regex, m[4], SubstCmd.parseRange(m[1], selection));
       }
     } catch {}
@@ -284,37 +280,40 @@ class SubstCmd {
   }
 
   findMatches(document: vscode.TextDocument): Match[] {
+    if (!this.search) {
+      return [];
+    }
     if (this.search.multiline) {
-      return this.findMatchesMultiline(document);
+      return this.findMatchesMultiline(this.search, document);
     } else {
-      return this.findMatchesByLine(document);
+      return this.findMatchesByLine(this.search, document);
     }
   }
 
-  findMatchesMultiline(document: vscode.TextDocument): Match[] {
+  findMatchesMultiline(search: RegExp, document: vscode.TextDocument): Match[] {
     const lineRange = this.adjustRange(document);
     const start = document.lineAt(lineRange.start).range.start;
     const end = document.lineAt(lineRange.end).range.end;
     const range = new vscode.Range(start, end);
-    return matchAll(this.search, document.getText(range)).map((match) => {
+    return matchAll(search, document.getText(range)).map((m) => {
       return {
-        text: match[0],
+        text: m[0],
         range: new vscode.Range(
-          document.positionAt(match.index),
-          document.positionAt(match.index + match[0].length)
+          document.positionAt(m.index),
+          document.positionAt(m.index + m[0].length)
         ),
       };
     });
   }
 
-  findMatchesByLine(document: vscode.TextDocument): Match[] {
+  findMatchesByLine(search: RegExp, document: vscode.TextDocument): Match[] {
     const lineRange = this.adjustRange(document);
     const matches: Match[] = [];
     for (let i = lineRange.start; i <= lineRange.end; ++i) {
       const line = document.lineAt(i);
       const start = line.range.start;
       matches.push(
-        ...matchAll(this.search, line.text).map((m) => {
+        ...matchAll(search, line.text).map((m) => {
           return {
             text: m[0],
             range: new vscode.Range(
